@@ -8,6 +8,10 @@ public class HumanoidUnit:Unit
 
     public float CurrentSpeed => m_Velocity.magnitude;
 
+    void Start()
+    {
+        m_LastPosition = transform.position;
+    }
     protected void Update()
     {
         m_Velocity = new Vector2(
@@ -17,6 +21,7 @@ public class HumanoidUnit:Unit
 
         m_LastPosition = transform.position;
         IsMoving = m_Velocity.magnitude > 0;
+
         m_Animator.SetFloat("Speed", Mathf.Clamp01(CurrentSpeed));
     }
- }
+}
