@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 826e1f4bfe24b6944b9ccf2fc8c8bd64
+guid: 29541c5560a982f429ad08ead24f2a7e
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4866884309602757033
-    second: Tower_Blue_0
+      213: 6049605792901559095
+    second: Water_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Tower_Blue_0
+      name: Water_0
       rect:
         serializedVersion: 2
-        x: 6
-        y: 20
-        width: 116
-        height: 185
+        x: 0
+        y: 0
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 756943b918a557cb0800000000000000
-      internalID: -4866884309602757033
+      spriteID: 733fa0d9a6484f350800000000000000
+      internalID: 6049605792901559095
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Tower_Blue_0: -4866884309602757033
+      Water_0: 6049605792901559095
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

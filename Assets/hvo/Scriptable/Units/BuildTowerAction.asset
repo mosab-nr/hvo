@@ -15,8 +15,10 @@ MonoBehaviour:
   Icon: {fileID: 1595120521, guid: cd8ee6aa8c0753840816be3aa7fb7dc4, type: 3}
   ActionName: Build Tower
   Guid: 4f26f1d7-8d64-4682-baef-0d4bc070457c
-  m_PlacementSprite: {fileID: 0}
+  m_PlacementSprite: {fileID: 21300000, guid: 826e1f4bfe24b6944b9ccf2fc8c8bd64, type: 3}
   m_FoundationSprite: {fileID: 0}
   m_CompletionSprite: {fileID: 0}
+  m_BuildingSize: {x: 2, y: 3, z: 0}
+  m_OriginOffset: {x: -1, y: -2, z: 0}
   m_GoldCost: 0
   m_WoodCost: 0
