@@ -14,6 +14,9 @@ public class PlacementProcess
     private Color m_HighlightColor = new Color(0, 0.8f, 1, 0.4f);
     private Color m_BlockedColor = new Color(1f, 0.2f, 0, 0.8f);
 
+    public BuildActionSO BuildAction => m_BuildAction;
+    public int GoldCost => m_BuildAction.GoldCost;
+    public int WoodCost => m_BuildAction.WoodCost;
     public PlacementProcess(
         BuildActionSO buildAction,
         Tilemap walkableTilemap,
@@ -35,6 +38,8 @@ public class PlacementProcess
             HighlightTiles(m_PlacementOutline.transform.position);
         }
 
+        if (HvoUtils.IsPointerOverUIElement()) return;
+
         if (HvoUtils.TryGetHoldPosition(out Vector3 worldPosition))
         {
             m_PlacementOutline.transform.position = SnapToGrid(worldPosition);
@@ -49,6 +54,37 @@ public class PlacementProcess
         renderer.color = new Color(1, 1, 1, 0.5f);
         renderer.sprite = m_BuildAction.PlacementSprite;
 
+    }
+
+    public void Cleanup()
+    {
+        Object.Destroy(m_PlacementOutline);
+        ClearHighlights();
+    }
+
+    public bool TryFinalizePlacement(out Vector3 buildPosition)
+    {
+        if (IsPlacementAreaValid())
+        {
+            ClearHighlights();
+            buildPosition = m_PlacementOutline.transform.position;
+            Object.Destroy(m_PlacementOutline);
+            return true;
+        }
+
+        Debug.Log("Invalid Placement Area");
+        buildPosition = Vector3.zero;
+        return false;
+    }
+
+    bool IsPlacementAreaValid()
+    {
+        foreach (var tilePosition in m_HighlightPositions)
+        {
+            if (!CanPlaceTile(tilePosition)) return false;
+        }
+
+        return true;
     }
 
     Vector3 SnapToGrid(Vector3 worldPosition)
@@ -122,6 +158,7 @@ public class PlacementProcess
     {
         Vector3 tileSize = m_WalkableTilemap.cellSize;
         Collider2D[] colliders = Physics2D.OverlapBoxAll(tilePosition + tileSize / 2, tileSize * 0.5f, 0);
+
         foreach (var collider in colliders)
         {
             var layer = collider.gameObject.layer;
@@ -130,6 +167,7 @@ public class PlacementProcess
                 return true;
             }
         }
+
         return false;
     }
 }
