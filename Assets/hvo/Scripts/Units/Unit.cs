@@ -1,9 +1,20 @@
 using UnityEngine;
 
+public enum UnitState
+{
+    Idle, Moving, Attacking, Chopping, Minig, Building
+}
+
+public enum UnitTask
+{
+    None, Build, Chop, Mine, Attack
+}
+
 public abstract class Unit : MonoBehaviour
 {
     [SerializeField] private ActionSO[] m_Actions;
-    public bool IsMoving;
+    [SerializeField] protected float m_ObjectDetectionRadius = 3f;
+
     public bool IsTargeted;
 
     protected Animator m_Animator;
@@ -12,7 +23,14 @@ public abstract class Unit : MonoBehaviour
     protected Material m_OriginalMaterial;
     protected Material m_HighlightMaterial;
 
+    public UnitState CurrentState { get; protected set; } = UnitState.Idle;
+    public UnitTask CurrentTask { get; protected set; } = UnitTask.None;
+    public Unit Target { get; protected set; }
+
     public ActionSO[] Actions => m_Actions;
+    public SpriteRenderer Renderer => m_SpriteRenderer;
+    public bool HasTarget => Target != null;
+
     protected void Awake()
     {
         if (TryGetComponent<Animator>(out var animator))
@@ -30,12 +48,28 @@ public abstract class Unit : MonoBehaviour
         m_HighlightMaterial = Resources.Load<Material>("Materials/Outline");
     }
 
+    public void SetTask(UnitTask task)
+    {
+        OnSetTask(CurrentTask, task);
+    }
+
+    public void SetState(UnitState state)
+    {
+        OnSetState(CurrentState, state);
+    }
+
+    public void SetTarget(Unit target)
+    {
+        Target = target;
+    }
+
     public void MoveTo(Vector3 destination)
     {
         var direction = (destination - transform.position).normalized;
         m_SpriteRenderer.flipX = direction.x < 0;
 
         m_AIPawn.SetDestination(destination);
+        OnSetDestination();
     }
 
     public void Select()
@@ -50,6 +84,23 @@ public abstract class Unit : MonoBehaviour
         IsTargeted = false;
     }
 
+    protected virtual void OnSetDestination() { }
+
+    protected virtual void OnSetTask(UnitTask oldTask, UnitTask newTask)
+    {
+        CurrentTask = newTask;
+    }
+
+    protected virtual void OnSetState(UnitState oldState, UnitState newState)
+    {
+        CurrentState = newState;
+    }
+
+    protected Collider2D[] RunProximityObjectDetection()
+    {
+        return Physics2D.OverlapCircleAll(transform.position, m_ObjectDetectionRadius);
+    }
+
     void Highlight()
     {
         m_SpriteRenderer.material = m_HighlightMaterial;
@@ -58,5 +109,11 @@ public abstract class Unit : MonoBehaviour
     void UnHighlight()
     {
         m_SpriteRenderer.material = m_OriginalMaterial;
+    }
+
+    void OnDrawGizmos()
+    {
+        Gizmos.color = new Color(0, 0, 1, 0.3f);
+        Gizmos.DrawSphere(transform.position, m_ObjectDetectionRadius);
     }
 }

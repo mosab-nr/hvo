@@ -1,7 +1,10 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.Tilemaps;
 
+public enum ClickType
+{
+    Move, Attack, Build
+}
 public class GameManager : SingletonManager<GameManager>
 {
     [Header("Tilemaps")]
@@ -10,9 +13,13 @@ public class GameManager : SingletonManager<GameManager>
     [SerializeField] private Tilemap[] m_UnreachableTilemaps;
 
     [Header("UI")]
-    [SerializeField] private PointToClick m_PointToClickPrefab;
+    [SerializeField] private PointToClick m_PointToMovePrefab;
+    [SerializeField] private PointToClick m_PointToBuildPrefab;
     [SerializeField] private ActionBar m_ActionBar;
     [SerializeField] private ConfirmationBar m_BuildConfirmationBar;
+
+    [Header("VFX")]
+    [SerializeField] private ParticleSystem m_ConstructionEffectPrefab;
 
     public Unit ActiveUnit;
 
@@ -93,7 +100,7 @@ public class GameManager : SingletonManager<GameManager>
     {
         if (HasActiveUnit && IsHumanoid(ActiveUnit))
         {
-            DisplayClickEffect(worldPoint);
+            DisplayClickEffect(worldPoint, ClickType.Move);
             ActiveUnit.MoveTo(worldPoint);
         }
     }
@@ -107,9 +114,23 @@ public class GameManager : SingletonManager<GameManager>
                 CancelActiveUnit();
                 return;
             }
+            else if (WorkerClickedOnUnfinishedBuild(unit))
+            {
+                DisplayClickEffect(unit.transform.position, ClickType.Build);
+                ((WorkerUnit)ActiveUnit).SendToBuild(unit as StructureUnit);
+                return;
+            }
         }
 
         SelectNewUnit(unit);
+    }
+
+    bool WorkerClickedOnUnfinishedBuild(Unit clickedUnit)
+    {
+        return
+            ActiveUnit is WorkerUnit &&
+            clickedUnit is StructureUnit structure &&
+            structure.IsUnderConstuction;
     }
 
     void SelectNewUnit(Unit unit)
@@ -142,9 +163,16 @@ public class GameManager : SingletonManager<GameManager>
         ClearActionBarUI();
     }
 
-    void DisplayClickEffect(Vector2 worldPoint)
+    void DisplayClickEffect(Vector2 worldPoint, ClickType clickType)
     {
-        Instantiate(m_PointToClickPrefab, (Vector3)worldPoint, Quaternion.identity);
+        if (clickType == ClickType.Move)
+        {
+            Instantiate(m_PointToMovePrefab, (Vector3)worldPoint, Quaternion.identity);
+        }
+        else if (clickType == ClickType.Build)
+        {
+            Instantiate(m_PointToBuildPrefab, (Vector3)worldPoint, Quaternion.identity);
+        }
     }
 
     void ShowUnitActions(Unit unit)
@@ -183,9 +211,17 @@ public class GameManager : SingletonManager<GameManager>
 
         if (m_PlacementProcess.TryFinalizePlacement(out Vector3 buildPosition))
         {
+            DisplayClickEffect(buildPosition, ClickType.Build);
             m_BuildConfirmationBar.Hide();
+
+            new BuildingProcess(
+                m_PlacementProcess.BuildAction,
+                buildPosition,
+                (WorkerUnit)ActiveUnit,
+                m_ConstructionEffectPrefab
+            );
+
             m_PlacementProcess = null;
-            Debug.Log("Foundations layed out: " + buildPosition);
         }
         else
         {
@@ -222,5 +258,11 @@ public class GameManager : SingletonManager<GameManager>
     {
         GUI.Label(new Rect(20, 40, 200, 20), "Gold: " + m_Gold.ToString(), new GUIStyle { fontSize = 30 });
         GUI.Label(new Rect(20, 80, 200, 20), "Wood: " + m_Wood.ToString(), new GUIStyle { fontSize = 30 });
+
+        if (ActiveUnit != null)
+        {
+            GUI.Label(new Rect(20, 120, 200, 20), "State: " + ActiveUnit.CurrentState.ToString(), new GUIStyle { fontSize = 30 });
+            GUI.Label(new Rect(20, 160, 200, 20), "Task: " + ActiveUnit.CurrentTask.ToString(), new GUIStyle { fontSize = 30 });
+        }
     }
 }
