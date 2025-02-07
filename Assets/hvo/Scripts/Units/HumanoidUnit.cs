@@ -6,6 +6,8 @@ public class HumanoidUnit:Unit
     protected Vector2 m_Velocity;
     protected Vector3 m_LastPosition;
 
+    protected float m_SmoothFactor = 50;
+    protected float m_SmoothedSpeed;
     public float CurrentSpeed => m_Velocity.magnitude;
 
     void Start()
@@ -18,7 +20,9 @@ public class HumanoidUnit:Unit
         UpdateVelocity();
         UpdateBehaviour();
     }
+
     protected virtual void UpdateBehaviour() { }
+
     protected virtual void UpdateVelocity()
     {
         m_Velocity = new Vector2(
@@ -27,9 +31,10 @@ public class HumanoidUnit:Unit
         ) / Time.deltaTime;
 
         m_LastPosition = transform.position;
-        var state = m_Velocity.magnitude > 0 ? UnitState.Moving : UnitState.Idle;
+        m_SmoothedSpeed = Mathf.Lerp(m_SmoothedSpeed, CurrentSpeed, Time.deltaTime * m_SmoothFactor);
+        var state = m_SmoothedSpeed > 0.1f ? UnitState.Moving : UnitState.Idle;
         SetState(state);
 
-        m_Animator?.SetFloat("Speed", Mathf.Clamp01(CurrentSpeed));
+        m_Animator?.SetFloat("Speed", Mathf.Clamp01(m_SmoothedSpeed));
     }
 }

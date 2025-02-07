@@ -1,33 +1,71 @@
-using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class AIPawn : MonoBehaviour
 {
     [SerializeField]
     private float m_Speed = 5f;
 
-    private Vector3? m_Destination;
+    public UnityAction<Vector3> OnNewPositionSelected = delegate { };
+    private List<Vector3> m_CurrentPath = new();
+    private TilemapManager m_TilemapManager;
+    private int m_CurrentNodeIndex;
 
-    public Vector3? Destination => m_Destination;
+    void Start()
+    {
+        m_TilemapManager = TilemapManager.Get();
+    }
 
     void Update()
     {
-        if (m_Destination.HasValue)
+        if (!IsPathValid())
         {
-            var dir = m_Destination.Value - transform.position;
-            transform.position += dir.normalized * Time.deltaTime * m_Speed;
+            return;
+        }
 
-            var distanceToDestination = Vector3.Distance(transform.position, m_Destination.Value);
+        Vector3 targetPosition = m_CurrentPath[m_CurrentNodeIndex];
+        Vector3 direction = (targetPosition - transform.position).normalized;
 
-            if (distanceToDestination < 0.1f)
+        transform.position += direction * m_Speed * Time.deltaTime;
+
+        if (Vector3.Distance(transform.position, targetPosition) <= 0.15f)
+        {
+            if (m_CurrentNodeIndex == m_CurrentPath.Count - 1)
             {
-                m_Destination = null;
+                Debug.Log("Destiantion Reached!");
+                m_CurrentPath = new();
+            }
+            else
+            {
+                m_CurrentNodeIndex++;
+                OnNewPositionSelected.Invoke(m_CurrentPath[m_CurrentNodeIndex]);
             }
         }
     }
 
     public void SetDestination(Vector3 destination)
     {
-        m_Destination = destination;
+        if (m_CurrentPath.Count > 0)
+        {
+            Node newEndNode = m_TilemapManager.FindNode(destination);
+            Vector3 endPosition = new Vector3(newEndNode.centerX, newEndNode.centerY);
+            var distance = Vector3.Distance(endPosition, m_CurrentPath[^1]);
+
+            if (distance < 0.1f)
+            {
+                return;
+            }
+        }
+
+        m_CurrentPath = m_TilemapManager.FindPath(transform.position, destination);
+        m_CurrentNodeIndex = 0;
+        OnNewPositionSelected.Invoke(m_CurrentPath[m_CurrentNodeIndex]);
+    }
+
+    bool IsPathValid()
+    {
+        return m_CurrentPath.Count > 0 && m_CurrentNodeIndex < m_CurrentPath.Count;
     }
 }

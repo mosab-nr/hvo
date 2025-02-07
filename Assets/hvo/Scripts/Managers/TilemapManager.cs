@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -8,9 +9,6 @@ public class TilemapManager : SingletonManager<TilemapManager>
     [SerializeField] private Tilemap m_OverlayTilemap;
     [SerializeField] private Tilemap[] m_UnreachableTilemaps;
 
-    [Header("Testing")]
-    [SerializeField] private Transform m_StartTransform;
-    [SerializeField] private Transform m_DestinationTransform;
     public Tilemap PathfindingTilemap => m_WalkableTilemap;
 
     private Pathfinding m_Pathfinding;
@@ -22,18 +20,26 @@ public class TilemapManager : SingletonManager<TilemapManager>
         );
     }
 
-    void Update()
+    public List<Vector3> FindPath(Vector3 startPosition, Vector3 endPosition)
     {
-        m_Pathfinding.FindPath(
-            m_StartTransform.position,
-            m_DestinationTransform.position
-        );
+        return m_Pathfinding.FindPath(startPosition, endPosition);
+    }
+
+    public Node FindNode(Vector3 position)
+    {
+        return m_Pathfinding.FindNode(position);
+    }
+
+    public void UpdateNodesInArea(Vector3Int startPosition, int width, int height)
+    {
+        m_Pathfinding.UpdateNodesInArea(startPosition, width, height);
     }
     public bool CanWalkAtTile(Vector3Int tilePosition)
     {
         return
             m_WalkableTilemap.HasTile(tilePosition) &&
-            !IsInUnreachableTilemap(tilePosition);
+            !IsInUnreachableTilemap(tilePosition) &&
+            !IsBlockedByBuilding(tilePosition);
     }
 
     public bool CanPlaceTile(Vector3Int tilePosition)
@@ -54,6 +60,15 @@ public class TilemapManager : SingletonManager<TilemapManager>
         return false;
     }
 
+    public bool IsBlockedByBuilding(Vector3Int tilePosition)
+    {
+        Vector3 worldPosition = m_WalkableTilemap.CellToWorld(tilePosition) + m_WalkableTilemap.cellSize / 2;
+        int buildingLayerMask = 1 << LayerMask.NameToLayer("Building");
+
+        Collider2D[] colliders = Physics2D.OverlapPointAll(worldPosition, buildingLayerMask);
+        return colliders.Length > 0;
+    }
+
     public bool IsBlockedByGameobject(Vector3Int tilePosition)
     {
         Vector3 tileSize = m_WalkableTilemap.cellSize;
@@ -62,7 +77,7 @@ public class TilemapManager : SingletonManager<TilemapManager>
         foreach (var collider in colliders)
         {
             var layer = collider.gameObject.layer;
-            if (layer == LayerMask.NameToLayer("Player"))
+            if (layer == LayerMask.NameToLayer("Player") || layer == LayerMask.NameToLayer("Building"))
             {
                 return true;
             }
