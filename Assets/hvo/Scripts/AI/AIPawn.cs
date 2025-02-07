@@ -9,6 +9,7 @@ public class AIPawn : MonoBehaviour
     private float m_Speed = 5f;
 
     public UnityAction<Vector3> OnNewPositionSelected = delegate { };
+
     private List<Vector3> m_CurrentPath = new();
     private TilemapManager m_TilemapManager;
     private int m_CurrentNodeIndex;
@@ -64,6 +65,11 @@ public class AIPawn : MonoBehaviour
         OnNewPositionSelected.Invoke(m_CurrentPath[m_CurrentNodeIndex]);
     }
 
+    public void Stop()
+    {
+        m_CurrentPath.Clear();
+        m_CurrentNodeIndex = 0;
+    }
     bool IsPathValid()
     {
         return m_CurrentPath.Count > 0 && m_CurrentNodeIndex < m_CurrentPath.Count;

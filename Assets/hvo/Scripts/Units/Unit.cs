@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public enum UnitState
@@ -15,6 +16,10 @@ public abstract class Unit : MonoBehaviour
     [SerializeField] private ActionSO[] m_Actions;
     [SerializeField] protected float m_ObjectDetectionRadius = 3f;
     [SerializeField] protected float m_UnitDetectionCheckRate = 0.5f;
+    [SerializeField] protected float m_AttackRange = 1.0f;
+    [SerializeField] protected float m_AutoAttackFrequency = 1.5f;
+    [SerializeField] protected float m_AutoAttackDamageDelay = 0.5f;
+    [SerializeField] protected int m_AutoAttackDamage = 7;
 
     public bool IsTargeted;
     protected GameManager m_GameManager;
@@ -24,6 +29,7 @@ public abstract class Unit : MonoBehaviour
     protected Material m_OriginalMaterial;
     protected Material m_HighlightMaterial;
     protected float m_NextUnitDetectionTime;
+    protected float m_NextAutoAttackTime;
 
     public UnitState CurrentState { get; protected set; } = UnitState.Idle;
     public UnitTask CurrentTask { get; protected set; } = UnitTask.None;
@@ -105,6 +111,11 @@ public abstract class Unit : MonoBehaviour
         IsTargeted = false;
     }
 
+    public void StopMovement()
+    {
+        m_AIPawn.Stop();
+    }
+
     protected virtual void OnSetDestination() { }
 
     protected virtual void OnSetTask(UnitTask oldTask, UnitTask newTask)
@@ -142,6 +153,41 @@ public abstract class Unit : MonoBehaviour
         }
     }
 
+    protected virtual bool TryAttackCurrentTarget()
+    {
+        if (Time.time >= m_NextAutoAttackTime)
+        {
+            m_NextAutoAttackTime = Time.time + m_AutoAttackFrequency;
+            PerformAttackAnimation();
+            StartCoroutine(DelayDamage(m_AutoAttackDamageDelay, m_AutoAttackDamage, Target));
+            return true;
+        }
+
+        return false;
+    }
+
+    protected virtual void PerformAttackAnimation()
+    {
+
+    }
+
+    protected virtual void TakeDamage(int damage, Unit damager)
+    {
+        Debug.Log($"{this.gameObject.name} took: {damage} points from {damager.gameObject.name}");
+    }
+    protected IEnumerator DelayDamage(float delay, int damage, Unit target)
+    {
+        yield return new WaitForSeconds(delay);
+        if (target != null)
+        {
+            target.TakeDamage(damage, this);
+        }
+    }
+    protected bool IsTargetInRange(Transform target)
+    {
+        return Vector3.Distance(target.transform.position, transform.position) <= m_AttackRange;
+    }
+
     protected Collider2D[] RunProximityObjectDetection()
     {
         return Physics2D.OverlapCircleAll(transform.position, m_ObjectDetectionRadius);
@@ -167,5 +213,8 @@ public abstract class Unit : MonoBehaviour
     {
         Gizmos.color = new Color(0, 0, 1, 0.3f);
         Gizmos.DrawSphere(transform.position, m_ObjectDetectionRadius);
+
+        Gizmos.color = new Color(1, 0, 0, 0.4f);
+        Gizmos.DrawSphere(transform.position, m_AttackRange);
     }
 }

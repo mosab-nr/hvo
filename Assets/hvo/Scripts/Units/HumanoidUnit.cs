@@ -21,6 +21,7 @@ public class HumanoidUnit : Unit
     {
         UpdateVelocity();
         UpdateBehaviour();
+        UpdateMovementAnimation();
     }
 
     protected virtual void UpdateBehaviour() { }
@@ -35,9 +36,28 @@ public class HumanoidUnit : Unit
         m_LastPosition = transform.position;
         m_SmoothedSpeed = Mathf.Lerp(m_SmoothedSpeed, CurrentSpeed, Time.deltaTime * m_SmoothFactor);
 
-        var state = m_SmoothedSpeed > 0.1f ? UnitState.Moving : UnitState.Idle;
-        SetState(state);
+        if (CurrentState != UnitState.Attacking)
+        {
+            var state = m_SmoothedSpeed > 0.1f ? UnitState.Moving : UnitState.Idle;
+            SetState(state);
+        }
+    }
 
+    protected virtual void UpdateMovementAnimation()
+    {
         m_Animator?.SetFloat("Speed", Mathf.Clamp01(m_SmoothedSpeed));
+    }
+    protected override void PerformAttackAnimation()
+    {
+        Vector3 direction = (Target.transform.position - transform.position).normalized;
+        if (Mathf.Abs(direction.x) > Mathf.Abs(direction.y))
+        {
+            m_SpriteRenderer.flipX = direction.x < 0;
+            m_Animator.SetTrigger("AttackHorizontal");
+        }
+        else
+        {
+            m_Animator.SetTrigger(direction.y > 0 ? "AttackUp" : "AttackDown");
+        }
     }
 }
