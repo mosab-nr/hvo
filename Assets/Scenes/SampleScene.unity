@@ -1066,6 +1066,8 @@ MonoBehaviour:
   m_PointToBuildPrefab: {fileID: 5034238476253532054, guid: e9eb7e5a896f4e5459181863299115aa, type: 3}
   m_ActionBar: {fileID: 1875222564}
   m_BuildConfirmationBar: {fileID: 1701510521}
+  m_PanSpeed: 100
+  m_MobilePanSpeed: 10
   m_ConstructionEffectPrefab: {fileID: 9033425204032439273, guid: e20d090320a3a1947b2716a817724bc8, type: 3}
   ActiveUnit: {fileID: 0}
 --- !u!4 &839097089
@@ -9021,7 +9023,7 @@ Transform:
   m_GameObject: {fileID: 1330291095}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.18, y: -1.79, z: 0}
+  m_LocalPosition: {x: -1.74, y: -2.09, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
