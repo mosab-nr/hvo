@@ -14,22 +14,31 @@ public abstract class Unit : MonoBehaviour
 {
     [SerializeField] private ActionSO[] m_Actions;
     [SerializeField] protected float m_ObjectDetectionRadius = 3f;
+    [SerializeField] protected float m_UnitDetectionCheckRate = 0.5f;
 
     public bool IsTargeted;
-
+    protected GameManager m_GameManager;
     protected Animator m_Animator;
     protected AIPawn m_AIPawn;
     protected SpriteRenderer m_SpriteRenderer;
     protected Material m_OriginalMaterial;
     protected Material m_HighlightMaterial;
+    protected float m_NextUnitDetectionTime;
 
     public UnitState CurrentState { get; protected set; } = UnitState.Idle;
     public UnitTask CurrentTask { get; protected set; } = UnitTask.None;
     public Unit Target { get; protected set; }
 
+    public virtual bool IsPlayer => true;
+    public virtual bool IsBuilding => false;
     public ActionSO[] Actions => m_Actions;
     public SpriteRenderer Renderer => m_SpriteRenderer;
     public bool HasTarget => Target != null;
+
+    protected virtual void Start()
+    {
+        RegisterUnit();
+    }
 
     protected void Awake()
     {
@@ -44,6 +53,7 @@ public abstract class Unit : MonoBehaviour
             m_AIPawn.OnNewPositionSelected += TurnToPosition;
         }
 
+        m_GameManager = GameManager.Get();
         m_SpriteRenderer = GetComponent<SpriteRenderer>();
         m_OriginalMaterial = m_SpriteRenderer.material;
         m_HighlightMaterial = Resources.Load<Material>("Materials/Outline");
@@ -55,7 +65,10 @@ public abstract class Unit : MonoBehaviour
         {
             m_AIPawn.OnNewPositionSelected -= TurnToPosition;
         }
+
+        UnregisterUnit();
     }
+
     public void SetTask(UnitTask task)
     {
         OnSetTask(CurrentTask, task);
@@ -104,6 +117,31 @@ public abstract class Unit : MonoBehaviour
         CurrentState = newState;
     }
 
+    protected virtual void RegisterUnit()
+    {
+        m_GameManager.RegisterUnit(this);
+    }
+
+    protected virtual void UnregisterUnit()
+    {
+        m_GameManager.UnregisterUnit(this);
+    }
+
+    protected virtual bool TryFindClosestFoe(out Unit foe)
+    {
+        if (Time.time >= m_NextUnitDetectionTime)
+        {
+            m_NextUnitDetectionTime = Time.time + m_UnitDetectionCheckRate;
+            foe = m_GameManager.FindClosestUnit(transform.position, m_ObjectDetectionRadius, !IsPlayer);
+            return foe != null;
+        }
+        else
+        {
+            foe = null;
+            return false;
+        }
+    }
+
     protected Collider2D[] RunProximityObjectDetection()
     {
         return Physics2D.OverlapCircleAll(transform.position, m_ObjectDetectionRadius);
@@ -114,6 +152,7 @@ public abstract class Unit : MonoBehaviour
         var direction = (newPosition - transform.position).normalized;
         m_SpriteRenderer.flipX = direction.x < 0;
     }
+
     void Highlight()
     {
         m_SpriteRenderer.material = m_HighlightMaterial;

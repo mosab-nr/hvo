@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -23,6 +25,8 @@ public class GameManager : SingletonManager<GameManager>
 
     public Unit ActiveUnit;
 
+    private List<Unit> m_PlayerUnits = new();
+    private List<Unit> m_Enemies = new();
     private CameraController m_CameraController;
     private PlacementProcess m_PlacementProcess;
     private int m_Gold = 1000;
@@ -53,6 +57,50 @@ public class GameManager : SingletonManager<GameManager>
         }
     }
 
+    public void RegisterUnit(Unit unit)
+    {
+        if (unit.IsPlayer)
+        {
+            m_PlayerUnits.Add(unit);
+        }
+        else
+        {
+            m_Enemies.Add(unit);
+        }
+
+        Debug.Log("Player Units: " + string.Join(", ", m_PlayerUnits.Select(unit => unit.gameObject.name)));
+        Debug.Log("Enemies: " + string.Join(", ", m_Enemies.Select(unit => unit.gameObject.name)));
+    }
+
+    public void UnregisterUnit(Unit unit)
+    {
+        if (unit.IsPlayer)
+        {
+            m_PlayerUnits.Remove(unit);
+        }
+        else
+        {
+            m_Enemies.Remove(unit);
+        }
+    }
+
+    public Unit FindClosestUnit(Vector3 originPosition, float maxDistance, bool isPlayer)
+    {
+        List<Unit> units = isPlayer ? m_PlayerUnits : m_Enemies;
+        float sqrMaxDistance = maxDistance * maxDistance;
+        Unit closestUnit = null;
+        float closestDistanceSqr = float.MaxValue;
+        foreach (Unit unit in units)
+        {
+            float sqrDistance = (unit.transform.position - originPosition).sqrMagnitude;
+            if (sqrDistance < sqrMaxDistance && sqrDistance < closestDistanceSqr)
+            {
+                closestUnit = unit;
+                closestDistanceSqr = sqrDistance;
+            }
+        }
+        return closestUnit;
+    }
     public void StartBuildProcess(BuildActionSO buildAction)
     {
         if (m_PlacementProcess != null) return;
@@ -79,7 +127,10 @@ public class GameManager : SingletonManager<GameManager>
 
         if (HasClickedOnUnit(hit, out var unit))
         {
-            HandleClickOnUnit(unit);
+            if (unit.IsPlayer)
+            {
+                HandleClickOnPlayerUnit(unit);
+            }
         }
         else
         {
@@ -108,7 +159,7 @@ public class GameManager : SingletonManager<GameManager>
         }
     }
 
-    void HandleClickOnUnit(Unit unit)
+    void HandleClickOnPlayerUnit(Unit unit)
     {
         if (HasActiveUnit)
         {

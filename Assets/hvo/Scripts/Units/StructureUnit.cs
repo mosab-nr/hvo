@@ -1,9 +1,10 @@
-using System.Numerics;
 using UnityEngine;
+
 public class StructureUnit : Unit
 {
     private BuildingProcess m_BuildingProcess;
 
+    public override bool IsBuilding => true;
     public bool IsUnderConstuction => m_BuildingProcess != null;
 
     void Update()
@@ -18,6 +19,7 @@ public class StructureUnit : Unit
     {
         UpdateWalkability();
     }
+
     public void OnConstructionFinished()
     {
         m_BuildingProcess = null;
@@ -38,17 +40,21 @@ public class StructureUnit : Unit
     {
         m_BuildingProcess?.RemoveWorker();
     }
+
     void UpdateWalkability()
     {
         int buildingWidthInTiles = 6;
         int buildingHeightInTiles = 6;
+
         float halfWidth = buildingWidthInTiles / 2f;
         float halfHeight = buildingHeightInTiles / 2f;
+
         Vector3Int startPosition = new Vector3Int(
             Mathf.FloorToInt(transform.position.x - halfWidth),
             Mathf.FloorToInt(transform.position.y - halfHeight),
             0
         );
+
         TilemapManager.Get()
             .UpdateNodesInArea(startPosition, buildingWidthInTiles, buildingHeightInTiles);
     }
