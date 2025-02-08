@@ -22,8 +22,10 @@ public class SoldierUnit : HumanoidUnit
         {
             m_NextAutoAttackTime = Time.time + m_AutoAttackFrequency / 2f;
         }
+
         base.OnSetState(oldState, newState);
     }
+
     protected override void OnSetTask(UnitTask oldTask, UnitTask newTask)
     {
         if (newTask == UnitTask.Attack && HasTarget)
@@ -44,7 +46,6 @@ public class SoldierUnit : HumanoidUnit
             m_IsRetreating = true;
             SetTarget(null);
             SetTask(UnitTask.None);
-            Debug.Log("Retreating!");
         }
     }
 
@@ -62,7 +63,7 @@ public class SoldierUnit : HumanoidUnit
         {
             if (HasTarget)
             {
-                if (IsTargetInRange(Target.transform))
+                if (IsTargetInRange(Target))
                 {
                     StopMovement();
                     SetState(UnitState.Attacking);
@@ -88,7 +89,7 @@ public class SoldierUnit : HumanoidUnit
         {
             if (HasTarget)
             {
-                if (IsTargetInRange(Target.transform))
+                if (IsTargetInRange(Target))
                 {
                     TryAttackCurrentTarget();
                 }

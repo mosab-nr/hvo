@@ -52,6 +52,7 @@ public abstract class Unit : MonoBehaviour
     public bool HasTarget => Target != null;
     public int CurrentHealth => m_CurrentHealth;
     public UnitStance CurrentStance => m_CurrentStance;
+    public CapsuleCollider2D Collider => m_Collider;
 
     protected virtual void Start()
     {
@@ -242,6 +243,7 @@ public abstract class Unit : MonoBehaviour
             GetTopPosition(),
             Color.red
         );
+
         if (m_FlashCoroutine == null)
         {
             m_FlashCoroutine = StartCoroutine(FlashEffect(0.2f, 2, m_DamageFlashColor));
@@ -265,6 +267,7 @@ public abstract class Unit : MonoBehaviour
             m_SpriteRenderer.color = originalColor;
             yield return new WaitForSeconds(duration / 2f);
         }
+
         m_SpriteRenderer.color = originalColor;
         m_FlashCoroutine = null;
     }
@@ -286,9 +289,11 @@ public abstract class Unit : MonoBehaviour
         }
     }
 
-    protected bool IsTargetInRange(Transform target)
+    protected bool IsTargetInRange(Unit target)
     {
-        return Vector3.Distance(target.transform.position, transform.position) <= m_AttackRange;
+        var targetCollider = target.Collider;
+        var targetClosestPoint = targetCollider.ClosestPoint(transform.position);
+        return Vector3.Distance(targetClosestPoint, transform.position) <= m_AttackRange;
     }
 
     protected Collider2D[] RunProximityObjectDetection()
@@ -298,6 +303,8 @@ public abstract class Unit : MonoBehaviour
 
     void TurnToPosition(Vector3 newPosition)
     {
+        if (HasTarget && !IsPlayer) return;
+
         var direction = (newPosition - transform.position).normalized;
         m_SpriteRenderer.flipX = direction.x < 0;
     }
