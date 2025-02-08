@@ -13,6 +13,10 @@ public class StructureUnit : Unit
         {
             m_BuildingProcess.Update();
         }
+        else
+        {
+            AfterConstructionUpdate();
+        }
     }
 
     void OnDestroy()
@@ -20,7 +24,7 @@ public class StructureUnit : Unit
         UpdateWalkability();
     }
 
-    public void OnConstructionFinished()
+    public virtual void OnConstructionFinished()
     {
         m_BuildingProcess = null;
         UpdateWalkability();
@@ -41,6 +45,7 @@ public class StructureUnit : Unit
         m_BuildingProcess?.RemoveWorker();
     }
 
+    protected virtual void AfterConstructionUpdate() { }
     void UpdateWalkability()
     {
         int buildingWidthInTiles = 4;
