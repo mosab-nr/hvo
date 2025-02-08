@@ -3,7 +3,7 @@ using UnityEngine;
 
 public enum UnitState
 {
-    Idle, Moving, Attacking, Chopping, Minig, Building
+    Idle, Moving, Attacking, Chopping, Minig, Building, Dead
 }
 
 public enum UnitTask
@@ -20,6 +20,8 @@ public abstract class Unit : MonoBehaviour
     [SerializeField] protected float m_AutoAttackFrequency = 1.5f;
     [SerializeField] protected float m_AutoAttackDamageDelay = 0.5f;
     [SerializeField] protected int m_AutoAttackDamage = 7;
+    [SerializeField] protected int m_Health = 100;
+    [SerializeField] protected Color m_DamageFlashColor = new Color(1f, 0.27f, 0.25f, 1f);
 
     public bool IsTargeted;
     protected GameManager m_GameManager;
@@ -31,6 +33,7 @@ public abstract class Unit : MonoBehaviour
     protected CapsuleCollider2D m_Collider;
     protected float m_NextUnitDetectionTime;
     protected float m_NextAutoAttackTime;
+    protected int m_CurrentHealth;
 
     public UnitState CurrentState { get; protected set; } = UnitState.Idle;
     public UnitTask CurrentTask { get; protected set; } = UnitTask.None;
@@ -41,6 +44,7 @@ public abstract class Unit : MonoBehaviour
     public ActionSO[] Actions => m_Actions;
     public SpriteRenderer Renderer => m_SpriteRenderer;
     public bool HasTarget => Target != null;
+    public int CurrentHealth => m_CurrentHealth;
 
     protected virtual void Start()
     {
@@ -65,6 +69,8 @@ public abstract class Unit : MonoBehaviour
         m_SpriteRenderer = GetComponent<SpriteRenderer>();
         m_OriginalMaterial = m_SpriteRenderer.material;
         m_HighlightMaterial = Resources.Load<Material>("Materials/Outline");
+
+        m_CurrentHealth = m_Health;
     }
 
     void OnDestroy()
@@ -73,8 +79,6 @@ public abstract class Unit : MonoBehaviour
         {
             m_AIPawn.OnNewPositionSelected -= TurnToPosition;
         }
-
-        UnregisterUnit();
     }
 
     public void SetTask(UnitTask task)
@@ -121,8 +125,10 @@ public abstract class Unit : MonoBehaviour
     public Vector3 GetTopPosition()
     {
         if (m_Collider == null) return transform.position;
+
         return transform.position + Vector3.up * m_Collider.size.y / 2;
     }
+
     protected virtual void OnSetDestination() { }
 
     protected virtual void OnSetTask(UnitTask oldTask, UnitTask newTask)
@@ -162,6 +168,8 @@ public abstract class Unit : MonoBehaviour
 
     protected virtual bool TryAttackCurrentTarget()
     {
+        if (Target.CurrentState == UnitState.Dead) return false;
+
         if (Time.time >= m_NextAutoAttackTime)
         {
             m_NextAutoAttackTime = Time.time + m_AutoAttackFrequency;
@@ -173,18 +181,44 @@ public abstract class Unit : MonoBehaviour
         return false;
     }
 
-    protected virtual void PerformAttackAnimation()
+    protected virtual void PerformAttackAnimation() { }
+    protected virtual void RunDeadEffect() { }
+    protected virtual void Die()
     {
-
+        SetState(UnitState.Dead);
+        RunDeadEffect();
+        UnregisterUnit();
     }
+
 
     protected virtual void TakeDamage(int damage, Unit damager)
     {
+        if (CurrentState == UnitState.Dead) return;
+
+        m_CurrentHealth -= damage;
         m_GameManager.ShowTextPopup(
             damage.ToString(),
             GetTopPosition(),
             Color.red
         );
+        StartCoroutine(FlashEffect(0.2f, 2, m_DamageFlashColor));
+
+        if (m_CurrentHealth <= 0)
+        {
+            Die();
+        }
+    }
+
+    protected IEnumerator FlashEffect(float duration, int flashCount, Color color)
+    {
+        Color originalColor = m_SpriteRenderer.color;
+        for (int i = 0; i < flashCount; i++)
+        {
+            m_SpriteRenderer.color = color;
+            yield return new WaitForSeconds(duration / 2f);
+            m_SpriteRenderer.color = originalColor;
+            yield return new WaitForSeconds(duration / 2f);
+        }
     }
 
     protected IEnumerator DelayDamage(float delay, int damage, Unit target)
@@ -193,7 +227,14 @@ public abstract class Unit : MonoBehaviour
 
         if (target != null)
         {
-            target.TakeDamage(damage, this);
+            if (target.CurrentState == UnitState.Dead)
+            {
+                SetTarget(null);
+            }
+            else
+            {
+                target.TakeDamage(damage, this);
+            }
         }
     }
 

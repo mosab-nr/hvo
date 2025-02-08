@@ -77,6 +77,19 @@ public class GameManager : SingletonManager<GameManager>
     {
         if (unit.IsPlayer)
         {
+            if (m_PlacementProcess != null)
+            {
+                CancelBuildPlacement();
+            }
+
+            if (ActiveUnit == unit)
+            {
+                ClearActionBarUI();
+                ActiveUnit.Deselect();
+                ActiveUnit = null;
+            }
+
+            unit.StopMovement();
             m_PlayerUnits.Remove(unit);
         }
         else
@@ -89,6 +102,7 @@ public class GameManager : SingletonManager<GameManager>
     {
         m_TextPopupController.Spawn(text, position, color);
     }
+
     public Unit FindClosestUnit(Vector3 originPosition, float maxDistance, bool isPlayer)
     {
         List<Unit> units = isPlayer ? m_PlayerUnits : m_Enemies;
@@ -98,6 +112,8 @@ public class GameManager : SingletonManager<GameManager>
 
         foreach (Unit unit in units)
         {
+            if (unit.CurrentState == UnitState.Dead) continue;
+
             float sqrDistance = (unit.transform.position - originPosition).sqrMagnitude;
             if (sqrDistance < sqrMaxDistance && sqrDistance < closestDistanceSqr)
             {
@@ -197,6 +213,8 @@ public class GameManager : SingletonManager<GameManager>
 
     void SelectNewUnit(Unit unit)
     {
+        if (unit.CurrentState == UnitState.Dead) return;
+
         if (HasActiveUnit)
         {
             ActiveUnit.Deselect();

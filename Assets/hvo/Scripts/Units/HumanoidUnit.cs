@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 public class HumanoidUnit : Unit
@@ -19,6 +20,8 @@ public class HumanoidUnit : Unit
 
     protected void Update()
     {
+        if (CurrentState == UnitState.Dead) return;
+
         UpdateVelocity();
         UpdateBehaviour();
         UpdateMovementAnimation();
@@ -47,9 +50,11 @@ public class HumanoidUnit : Unit
     {
         m_Animator?.SetFloat("Speed", Mathf.Clamp01(m_SmoothedSpeed));
     }
+
     protected override void PerformAttackAnimation()
     {
         Vector3 direction = (Target.transform.position - transform.position).normalized;
+
         if (Mathf.Abs(direction.x) > Mathf.Abs(direction.y))
         {
             m_SpriteRenderer.flipX = direction.x < 0;
@@ -59,5 +64,16 @@ public class HumanoidUnit : Unit
         {
             m_Animator.SetTrigger(direction.y > 0 ? "AttackUp" : "AttackDown");
         }
+    }
+
+    protected override void RunDeadEffect()
+    {
+        m_Animator.SetTrigger("Dead");
+        StartCoroutine(LateObjectDestroy(1.2f));
+    }
+    private IEnumerator LateObjectDestroy(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        Destroy(gameObject);
     }
 }

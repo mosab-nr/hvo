@@ -7541,7 +7541,7 @@ Tilemap:
       - {fileID: 7752229987998269982, guid: fb099e7c33c6b1a439c6497321e7d5da, type: 3}
       - {fileID: -4710801888167562894, guid: fb099e7c33c6b1a439c6497321e7d5da, type: 3}
       - {fileID: 6853023835892009477, guid: fb099e7c33c6b1a439c6497321e7d5da, type: 3}
-      m_AnimationSpeed: 10.000001
+      m_AnimationSpeed: 10
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: -2, y: -9, z: 0}
@@ -8066,7 +8066,7 @@ Tilemap:
       - {fileID: 7752229987998269982, guid: fb099e7c33c6b1a439c6497321e7d5da, type: 3}
       - {fileID: -4710801888167562894, guid: fb099e7c33c6b1a439c6497321e7d5da, type: 3}
       - {fileID: 6853023835892009477, guid: fb099e7c33c6b1a439c6497321e7d5da, type: 3}
-      m_AnimationSpeed: 10.000001
+      m_AnimationSpeed: 10
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: -15, y: 1, z: 0}
@@ -9131,6 +9131,7 @@ MonoBehaviour:
   m_AutoAttackFrequency: 1.5
   m_AutoAttackDamageDelay: 0.5
   m_AutoAttackDamage: 7
+  m_Health: 100
   IsTargeted: 0
 --- !u!114 &1248058786
 MonoBehaviour:
@@ -9290,6 +9291,7 @@ MonoBehaviour:
   m_AutoAttackFrequency: 1.5
   m_AutoAttackDamageDelay: 0.5
   m_AutoAttackDamage: 7
+  m_Health: 15
   IsTargeted: 0
 --- !u!70 &1330291101
 CapsuleCollider2D:
@@ -14598,6 +14600,7 @@ MonoBehaviour:
   m_AutoAttackFrequency: 1.5
   m_AutoAttackDamageDelay: 0.5
   m_AutoAttackDamage: 7
+  m_Health: 6
   IsTargeted: 0
 --- !u!1 &1523239394
 GameObject:
