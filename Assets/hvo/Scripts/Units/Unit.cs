@@ -21,7 +21,7 @@ public abstract class Unit : MonoBehaviour
     [SerializeField] protected float m_AutoAttackDamageDelay = 0.5f;
     [SerializeField] protected int m_AutoAttackDamage = 7;
     [SerializeField] protected int m_Health = 100;
-    [SerializeField] protected Color m_DamageFlashColor = new Color(1f, 0.27f, 0.25f, 1f);
+    [SerializeField] protected Color m_DamageFlashColor = new Color(1f, 0.65f, 0.65f, 1f);
 
     public bool IsTargeted;
     protected GameManager m_GameManager;
@@ -62,6 +62,7 @@ public abstract class Unit : MonoBehaviour
         {
             m_AIPawn = aiPawn;
             m_AIPawn.OnNewPositionSelected += TurnToPosition;
+            m_AIPawn.OnDestinationReached += OnDestinationReached;
         }
 
         m_Collider = GetComponent<CapsuleCollider2D>();
@@ -78,6 +79,7 @@ public abstract class Unit : MonoBehaviour
         if (m_AIPawn != null)
         {
             m_AIPawn.OnNewPositionSelected -= TurnToPosition;
+            m_AIPawn.OnDestinationReached -= OnDestinationReached;
         }
     }
 
@@ -141,6 +143,7 @@ public abstract class Unit : MonoBehaviour
         CurrentState = newState;
     }
 
+    protected virtual void OnDestinationReached() { }
     protected virtual void RegisterUnit()
     {
         m_GameManager.RegisterUnit(this);
@@ -212,10 +215,12 @@ public abstract class Unit : MonoBehaviour
     protected IEnumerator FlashEffect(float duration, int flashCount, Color color)
     {
         Color originalColor = m_SpriteRenderer.color;
+
         for (int i = 0; i < flashCount; i++)
         {
             m_SpriteRenderer.color = color;
             yield return new WaitForSeconds(duration / 2f);
+
             m_SpriteRenderer.color = originalColor;
             yield return new WaitForSeconds(duration / 2f);
         }

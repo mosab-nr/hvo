@@ -1109,10 +1109,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_PointToMovePrefab: {fileID: 5034238476253532054, guid: 6713ccfc947f0434bb54c5d43bf68f38, type: 3}
   m_PointToBuildPrefab: {fileID: 5034238476253532054, guid: e9eb7e5a896f4e5459181863299115aa, type: 3}
+  m_PointToAttackPrefab: {fileID: 5034238476253532054, guid: 2c605a0e2cd944e408e542bf0bc894d2, type: 3}
   m_ActionBar: {fileID: 1875222564}
   m_BuildConfirmationBar: {fileID: 1701510521}
   m_TextPopupController: {fileID: 139411778}
-  m_PanSpeed: 100
+  m_PanSpeed: 200
   m_MobilePanSpeed: 10
   m_ConstructionEffectPrefab: {fileID: 9033425204032439273, guid: e20d090320a3a1947b2716a817724bc8, type: 3}
   ActiveUnit: {fileID: 0}
@@ -7361,7 +7362,7 @@ Tilemap:
       - {fileID: 7752229987998269982, guid: fb099e7c33c6b1a439c6497321e7d5da, type: 3}
       - {fileID: -4710801888167562894, guid: fb099e7c33c6b1a439c6497321e7d5da, type: 3}
       - {fileID: 6853023835892009477, guid: fb099e7c33c6b1a439c6497321e7d5da, type: 3}
-      m_AnimationSpeed: 10
+      m_AnimationSpeed: 10.000001
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: -14, y: -9, z: 0}
@@ -7481,7 +7482,7 @@ Tilemap:
       - {fileID: 7752229987998269982, guid: fb099e7c33c6b1a439c6497321e7d5da, type: 3}
       - {fileID: -4710801888167562894, guid: fb099e7c33c6b1a439c6497321e7d5da, type: 3}
       - {fileID: 6853023835892009477, guid: fb099e7c33c6b1a439c6497321e7d5da, type: 3}
-      m_AnimationSpeed: 10
+      m_AnimationSpeed: 10.000001
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: -6, y: -9, z: 0}
@@ -7811,7 +7812,7 @@ Tilemap:
       - {fileID: 7752229987998269982, guid: fb099e7c33c6b1a439c6497321e7d5da, type: 3}
       - {fileID: -4710801888167562894, guid: fb099e7c33c6b1a439c6497321e7d5da, type: 3}
       - {fileID: 6853023835892009477, guid: fb099e7c33c6b1a439c6497321e7d5da, type: 3}
-      m_AnimationSpeed: 10
+      m_AnimationSpeed: 10.000001
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: 14, y: -8, z: 0}
@@ -9132,6 +9133,7 @@ MonoBehaviour:
   m_AutoAttackDamageDelay: 0.5
   m_AutoAttackDamage: 7
   m_Health: 100
+  m_DamageFlashColor: {r: 1, g: 0.27, b: 0.25, a: 1}
   IsTargeted: 0
 --- !u!114 &1248058786
 MonoBehaviour:
@@ -9145,7 +9147,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 056ad8e74430e854b8c0c05851590b58, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Speed: 3
+  m_Speed: 0
 --- !u!1 &1330291095
 GameObject:
   m_ObjectHideFlags: 0
@@ -9157,9 +9159,9 @@ GameObject:
   - component: {fileID: 1330291098}
   - component: {fileID: 1330291097}
   - component: {fileID: 1330291096}
-  - component: {fileID: 1330291100}
   - component: {fileID: 1330291099}
   - component: {fileID: 1330291101}
+  - component: {fileID: 1330291102}
   m_Layer: 6
   m_Name: Warrior
   m_TagString: Untagged
@@ -9272,27 +9274,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Speed: 3
---- !u!114 &1330291100
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1330291095}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 01aad0694ece097499dd9f0600b8a09b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Actions: []
-  m_ObjectDetectionRadius: 3
-  m_UnitDetectionCheckRate: 0.5
-  m_AttackRange: 1
-  m_AutoAttackFrequency: 1.5
-  m_AutoAttackDamageDelay: 0.5
-  m_AutoAttackDamage: 7
-  m_Health: 15
-  IsTargeted: 0
 --- !u!70 &1330291101
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -9330,6 +9311,28 @@ CapsuleCollider2D:
   m_Offset: {x: 0.077218175, y: 0.09113884}
   m_Size: {x: 1.3006384, y: 1.6146412}
   m_Direction: 0
+--- !u!114 &1330291102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1330291095}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dd7b2dfa8b296a44fbe53f31faf62156, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Actions: []
+  m_ObjectDetectionRadius: 5
+  m_UnitDetectionCheckRate: 0.5
+  m_AttackRange: 1
+  m_AutoAttackFrequency: 1.5
+  m_AutoAttackDamageDelay: 0.5
+  m_AutoAttackDamage: 10
+  m_Health: 100
+  m_DamageFlashColor: {r: 1, g: 0.65, b: 0.65, a: 1}
+  IsTargeted: 0
 --- !u!1 &1371089561
 GameObject:
   m_ObjectHideFlags: 0
@@ -14601,6 +14604,7 @@ MonoBehaviour:
   m_AutoAttackDamageDelay: 0.5
   m_AutoAttackDamage: 7
   m_Health: 6
+  m_DamageFlashColor: {r: 1, g: 0.27, b: 0.25, a: 1}
   IsTargeted: 0
 --- !u!1 &1523239394
 GameObject:
