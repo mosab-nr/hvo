@@ -223,3 +223,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_IconImage: {fileID: 9189517583395923181}
   m_Button: {fileID: 6878680600293891922}
+  m_ButtonImage: {fileID: 4797900155636657260}
+  m_ButtonFocusedSprite: {fileID: 21300000, guid: 2b4f5b1cedcbbc742b5f2aaac5cc710d, type: 3}
+  m_ButtonDefaultSprite: {fileID: 21300000, guid: 1d603080e42778746ad0ffb4acab2a1f, type: 3}

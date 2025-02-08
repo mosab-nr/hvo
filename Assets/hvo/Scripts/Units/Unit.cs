@@ -108,6 +108,15 @@ public abstract class Unit : MonoBehaviour
     public virtual void SetStance(UnitStanceActionSO stanceActionSO)
     {
         m_CurrentStance = stanceActionSO.UnitStance;
+
+        for (int i = 0; i < m_Actions.Length; i++)
+        {
+            if (m_Actions[i] == stanceActionSO)
+            {
+                m_GameManager.FocusActionUI(i);
+                return;
+            }
+        }
     }
 
     public void MoveTo(Vector3 destination, DestinationSource source = DestinationSource.CodeTriggered)
@@ -123,6 +132,15 @@ public abstract class Unit : MonoBehaviour
     {
         Highlight();
         IsTargeted = true;
+
+        for (int i = 0; i < m_Actions.Length; i++)
+        {
+            if (m_Actions[i] is UnitStanceActionSO stanceAction && stanceAction.UnitStance == m_CurrentStance)
+            {
+                m_GameManager.FocusActionUI(i);
+                return;
+            }
+        }
     }
 
     public void Deselect()
@@ -207,21 +225,27 @@ public abstract class Unit : MonoBehaviour
     }
 
 
+    private Coroutine m_FlashCoroutine;
     protected virtual void TakeDamage(int damage, Unit damager)
     {
         if (CurrentState == UnitState.Dead) return;
 
         m_CurrentHealth -= damage;
+
         if (!HasTarget)
         {
             SetTarget(damager);
         }
+
         m_GameManager.ShowTextPopup(
             damage.ToString(),
             GetTopPosition(),
             Color.red
         );
-        StartCoroutine(FlashEffect(0.2f, 2, m_DamageFlashColor));
+        if (m_FlashCoroutine == null)
+        {
+            m_FlashCoroutine = StartCoroutine(FlashEffect(0.2f, 2, m_DamageFlashColor));
+        }
 
         if (m_CurrentHealth <= 0)
         {
@@ -241,6 +265,8 @@ public abstract class Unit : MonoBehaviour
             m_SpriteRenderer.color = originalColor;
             yield return new WaitForSeconds(duration / 2f);
         }
+        m_SpriteRenderer.color = originalColor;
+        m_FlashCoroutine = null;
     }
 
     protected IEnumerator DelayDamage(float delay, int damage, Unit target)
