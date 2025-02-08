@@ -3,6 +3,17 @@ using UnityEngine;
 public class SoldierUnit : HumanoidUnit
 {
     private bool m_IsRetreating = false;
+
+    public override void SetStance(UnitStanceActionSO stanceActionSO)
+    {
+        base.SetStance(stanceActionSO);
+        if (CurrentStance == UnitStance.Defensive)
+        {
+            SetState(UnitState.Idle);
+            StopMovement();
+            m_IsRetreating = false;
+        }
+    }
     protected override void OnSetTask(UnitTask oldTask, UnitTask newTask)
     {
         if (newTask == UnitTask.Attack && HasTarget)
@@ -13,16 +24,17 @@ public class SoldierUnit : HumanoidUnit
         base.OnSetTask(oldTask, newTask);
     }
 
-    protected override void OnSetDestination()
+    protected override void OnSetDestination(DestinationSource source)
     {
-        if (HasTarget && (CurrentTask == UnitTask.Attack || CurrentState == UnitState.Attacking))
+        if (
+            HasTarget
+            && source == DestinationSource.PlayerClick
+            && (CurrentTask == UnitTask.Attack || CurrentState == UnitState.Attacking))
         {
             m_IsRetreating = true;
-        }
-        if (CurrentTask == UnitTask.Attack)
-        {
-            SetTask(UnitTask.None);
             SetTarget(null);
+            SetTask(UnitTask.None);
+            Debug.Log("Retreating!");
         }
     }
 
@@ -33,6 +45,7 @@ public class SoldierUnit : HumanoidUnit
             m_IsRetreating = false;
         }
     }
+
     protected override void UpdateBehaviour()
     {
         if (CurrentState == UnitState.Idle || CurrentState == UnitState.Moving)
@@ -44,13 +57,20 @@ public class SoldierUnit : HumanoidUnit
                     StopMovement();
                     SetState(UnitState.Attacking);
                 }
+                else if (CurrentStance == UnitStance.Offensive)
+                {
+                    MoveTo(Target.transform.position);
+                }
             }
             else
             {
-                if (!m_IsRetreating && TryFindClosestFoe(out var foe))
+                if (CurrentStance == UnitStance.Offensive)
                 {
-                    SetTarget(foe);
-                    SetTask(UnitTask.Attack);
+                    if (!m_IsRetreating && TryFindClosestFoe(out var foe))
+                    {
+                        SetTarget(foe);
+                        SetTask(UnitTask.Attack);
+                    }
                 }
             }
         }
@@ -64,7 +84,15 @@ public class SoldierUnit : HumanoidUnit
                 }
                 else
                 {
-                    SetState(UnitState.Idle);
+                    if (CurrentStance == UnitStance.Defensive)
+                    {
+                        SetTarget(null);
+                        SetState(UnitState.Idle);
+                    }
+                    else
+                    {
+                        MoveTo(Target.transform.position);
+                    }
                 }
             }
             else
