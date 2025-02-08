@@ -15,6 +15,7 @@ public class GameManager : SingletonManager<GameManager>
     [SerializeField] private PointToClick m_PointToBuildPrefab;
     [SerializeField] private ActionBar m_ActionBar;
     [SerializeField] private ConfirmationBar m_BuildConfirmationBar;
+    [SerializeField] private TextPopupController m_TextPopupController;
 
     [Header("Camera Settings")]
     [SerializeField] private float m_PanSpeed = 100;
@@ -84,12 +85,17 @@ public class GameManager : SingletonManager<GameManager>
         }
     }
 
+    public void ShowTextPopup(string text, Vector3 position, Color color)
+    {
+        m_TextPopupController.Spawn(text, position, color);
+    }
     public Unit FindClosestUnit(Vector3 originPosition, float maxDistance, bool isPlayer)
     {
         List<Unit> units = isPlayer ? m_PlayerUnits : m_Enemies;
         float sqrMaxDistance = maxDistance * maxDistance;
         Unit closestUnit = null;
         float closestDistanceSqr = float.MaxValue;
+
         foreach (Unit unit in units)
         {
             float sqrDistance = (unit.transform.position - originPosition).sqrMagnitude;
@@ -99,8 +105,10 @@ public class GameManager : SingletonManager<GameManager>
                 closestDistanceSqr = sqrDistance;
             }
         }
+
         return closestUnit;
     }
+
     public void StartBuildProcess(BuildActionSO buildAction)
     {
         if (m_PlacementProcess != null) return;
