@@ -2,6 +2,14 @@ using UnityEngine;
 
 public class WorkerUnit : HumanoidUnit
 {
+    [SerializeField] private float m_WoodGatherTickTime = 1f;
+    [SerializeField] private int m_WoodPerTick = 1;
+    private float m_ChoppingTimer;
+    private int m_WoodCollected;
+    private int m_GoldCollected;
+    private int m_WoodCapacity = 5;
+    private int m_GoldCapacity = 10;
+    private Tree m_AssignedTree;
 
     protected override void UpdateBehaviour()
     {
@@ -9,18 +17,83 @@ public class WorkerUnit : HumanoidUnit
         {
             CheckForConstruction();
         }
+        else if (
+            CurrentTask == UnitTask.Chop
+            && m_AssignedTree != null
+            && m_WoodCollected < m_WoodCapacity
+        )
+        {
+            HandleChoppingTask();
+        }
+
+
+        if (CurrentState == UnitState.Chopping && m_WoodCollected < m_WoodCapacity)
+        {
+            StartChopping();
+        }
+        Debug.Log(m_WoodCollected);
     }
 
-    protected override void OnSetDestination(DestinationSource source) => ResetState();
+    protected override void OnSetDestination(DestinationSource source)
+    {
+        SetState(UnitState.Moving);
+        ResetState();
+    }
 
     public void OnBuildingFinished() => ResetState();
-
 
     public void SendToBuild(StructureUnit structure)
     {
         MoveTo(structure.transform.position);
         SetTarget(structure);
         SetTask(UnitTask.Build);
+    }
+
+    public void SendToChop(Tree tree)
+    {
+        if (tree.TryToClaim())
+        {
+            MoveTo(tree.GetBottomPosition());
+            SetTask(UnitTask.Chop);
+            m_AssignedTree = tree;
+        }
+    }
+
+    protected override void Die()
+    {
+        base.Die();
+        if (m_AssignedTree != null) m_AssignedTree.Release();
+
+    }
+
+    void HandleChoppingTask()
+    {
+        var treeBottomPosition = m_AssignedTree.GetBottomPosition();
+        var workerClosestPoint = Collider.ClosestPoint(treeBottomPosition);
+
+        var distance = Vector3.Distance(treeBottomPosition, workerClosestPoint);
+
+        if (distance <= 0.1f)
+        {
+            StopMovement();
+            SetState(UnitState.Chopping);
+        }
+    }
+
+    void StartChopping()
+    {
+        m_Animator.SetBool("IsChopping", true);
+        m_ChoppingTimer += Time.deltaTime;
+        if (m_ChoppingTimer >= m_WoodGatherTickTime)
+        {
+            m_WoodCollected += m_WoodPerTick;
+            m_ChoppingTimer = 0;
+            if (m_WoodCollected == m_WoodCapacity)
+            {
+                m_Animator.SetBool("IsChopping", false);
+                SetState(UnitState.Idle);
+            }
+        }
     }
 
     void CheckForConstruction()
@@ -47,6 +120,14 @@ public class WorkerUnit : HumanoidUnit
         if (HasTarget) CleanupTarget();
 
         m_Animator.SetBool("IsBuilding", false);
+        m_Animator.SetBool("IsChopping", false);
+
+        m_ChoppingTimer = 0;
+        if (m_AssignedTree != null)
+        {
+            m_AssignedTree.Release();
+            m_AssignedTree = null;
+        }
     }
 
     void CleanupTarget()
