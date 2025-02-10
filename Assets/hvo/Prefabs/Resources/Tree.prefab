@@ -162,3 +162,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Collider: {fileID: 8487539977922373593}
+  m_Animator: {fileID: 397961322981246338}
+  m_Claimed: 0

@@ -8,7 +8,7 @@ public enum UnitState
 
 public enum UnitTask
 {
-    None, Build, Chop, Mine, Attack
+    None, Build, Chop, Mine, Attack, ReturnResource
 }
 
 public enum DestinationSource
@@ -226,10 +226,12 @@ public abstract class Unit : MonoBehaviour
     protected virtual void Die()
     {
         SetState(UnitState.Dead);
+
         if (m_AIPawn != null)
         {
             StopMovement();
         }
+
         RunDeadEffect();
         UnregisterUnit();
     }
