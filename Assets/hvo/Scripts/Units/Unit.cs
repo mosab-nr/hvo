@@ -18,6 +18,7 @@ public enum DestinationSource
 
 public abstract class Unit : MonoBehaviour
 {
+    [SerializeField] private bool m_IsKingUnit = false;
     [SerializeField] private ActionSO[] m_Actions;
     [SerializeField] protected float m_ObjectDetectionRadius = 3f;
     [SerializeField] protected float m_UnitDetectionCheckRate = 0.5f;
@@ -53,6 +54,7 @@ public abstract class Unit : MonoBehaviour
     public int CurrentHealth => m_CurrentHealth;
     public UnitStance CurrentStance => m_CurrentStance;
     public CapsuleCollider2D Collider => m_Collider;
+    public bool IsKingUnit => m_IsKingUnit;
 
     protected virtual void Start()
     {
@@ -125,11 +127,13 @@ public abstract class Unit : MonoBehaviour
         m_SpriteRenderer.enabled = false;
         m_Collider.enabled = false;
     }
+
     public void Show()
     {
         m_SpriteRenderer.enabled = true;
         m_Collider.enabled = true;
     }
+
     public void MoveTo(Vector3 destination, DestinationSource source = DestinationSource.CodeTriggered)
     {
         var direction = (destination - transform.position).normalized;
