@@ -7,6 +7,7 @@ public class TilemapManager : SingletonManager<TilemapManager>
 {
     [SerializeField] private Tilemap m_WalkableTilemap;
     [SerializeField] private Tilemap m_OverlayTilemap;
+    [SerializeField] private Tilemap m_UnbuildableTilemap;
     [SerializeField] private Tilemap[] m_UnreachableTilemaps;
 
     public Tilemap PathfindingTilemap => m_WalkableTilemap;
@@ -48,7 +49,8 @@ public class TilemapManager : SingletonManager<TilemapManager>
         return
             m_WalkableTilemap.HasTile(tilePosition) &&
             !IsInUnreachableTilemap(tilePosition) &&
-            !IsBlockedByGameobject(tilePosition);
+            !IsBlockedByGameobject(tilePosition) &&
+            !m_UnbuildableTilemap.HasTile(tilePosition);
     }
 
     public bool IsInUnreachableTilemap(Vector3Int tilePosition)
@@ -71,6 +73,7 @@ public class TilemapManager : SingletonManager<TilemapManager>
         {
             if (collider.CompareTag("Building")) return true;
         }
+
         return false;
     }
 
