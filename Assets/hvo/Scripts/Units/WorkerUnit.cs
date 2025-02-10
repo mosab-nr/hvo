@@ -16,7 +16,9 @@ public class WorkerUnit : HumanoidUnit
     private int m_WoodCapacity = 10;
     private int m_GoldCapacity = 10;
     private Tree m_AssignedTree;
+    private GoldMine m_AssignedMine;
     private StructureUnit m_AssignedWoodStorage;
+    private StructureUnit m_AssignedGoldStorage;
 
     public bool IsHoldingWood => m_WoodCollected > 0;
     public bool IsHoldingGold => m_GoldCollected > 0;
@@ -37,15 +39,24 @@ public class WorkerUnit : HumanoidUnit
             HandleChoppingTask();
         }
         else if (
-            CurrentTask == UnitTask.ReturnResource
-            && m_AssignedWoodStorage != null
-            && IsHoldingWood
+            CurrentTask == UnitTask.Mine
+            && m_AssignedMine != null
+            && !IsHoldingGold
         )
         {
-            var closesPointOnStorage = m_AssignedWoodStorage.Collider.ClosestPoint(transform.position);
-            var distance = Vector3.Distance(closesPointOnStorage, transform.position);
-
-            if (distance < 1f)
+            HandleMinningTask();
+        }
+        else if (CurrentTask == UnitTask.ReturnResource)
+        {
+            if (IsHoldingGold && TryToReturnResources(m_AssignedGoldStorage))
+            {
+                m_GameManager.ShowTextPopup(m_GoldCollected.ToString(), GetTopPosition(), Color.yellow);
+                m_GameManager.AddResources(m_GoldCollected, 0);
+                m_GoldCollected = 0;
+                MoveTo(m_GameManager.ActiveGoldMine.GetBottomPosition());
+                SetTask(UnitTask.Mine);
+            }
+            else if (IsHoldingWood && TryToReturnResources(m_AssignedWoodStorage, 1f))
             {
                 m_GameManager.ShowTextPopup(m_WoodCollected.ToString(), GetTopPosition(), Color.green);
                 m_GameManager.AddResources(0, m_WoodCollected);
@@ -64,6 +75,8 @@ public class WorkerUnit : HumanoidUnit
 
     protected override void OnSetDestination(DestinationSource source)
     {
+        if (CurrentState == UnitState.Minig) return;
+
         SetState(UnitState.Moving);
         ResetState();
     }
@@ -75,6 +88,10 @@ public class WorkerUnit : HumanoidUnit
         m_AssignedWoodStorage = storage;
     }
 
+    public void SetGoldStorage(StructureUnit storage)
+    {
+        m_AssignedGoldStorage = storage;
+    }
     public void SendToBuild(StructureUnit structure)
     {
         MoveTo(structure.transform.position);
@@ -92,11 +109,50 @@ public class WorkerUnit : HumanoidUnit
         }
     }
 
+    public void SendToMine(GoldMine mine)
+    {
+        MoveTo(mine.GetBottomPosition());
+        SetTask(UnitTask.Mine);
+        m_AssignedMine = mine;
+    }
+
     protected override void Die()
     {
         base.Die();
         if (m_AssignedTree != null) m_AssignedTree.Release();
 
+    }
+
+    public void OnEnterMine()
+    {
+        Hide();
+    }
+
+    public void OnLeaveMine()
+    {
+        Show();
+        m_GoldCollected = m_GoldCapacity;
+        SetState(UnitState.Idle);
+
+        m_AssignedGoldStorage = m_GameManager.FindClosestGoldStorage(transform.position);
+
+        if (m_AssignedGoldStorage != null)
+        {
+            MoveTo(m_AssignedGoldStorage.transform.position);
+            SetTask(UnitTask.ReturnResource);
+        }
+    }
+
+    bool TryToReturnResources(StructureUnit storage, float distanceTreshold = 0.5f)
+    {
+        if (storage != null)
+        {
+            var closestPoint = storage.Collider.ClosestPoint(transform.position);
+            var distance = Vector3.Distance(closestPoint, transform.position);
+            return distance < distanceTreshold;
+        }
+
+        return false;
     }
 
     void HandleResourceDisplay()
@@ -124,6 +180,23 @@ public class WorkerUnit : HumanoidUnit
         }
     }
 
+    void HandleMinningTask()
+    {
+        var mineBottomPosition = m_AssignedMine.GetBottomPosition();
+        var workerClosestPoint = Collider.ClosestPoint(mineBottomPosition);
+        var distance = Vector3.Distance(mineBottomPosition, workerClosestPoint);
+
+        if (distance <= 0.20f)
+        {
+            if (m_AssignedMine.TryToEnterMine(this))
+            {
+                m_WoodCollected = 0;
+                StopMovement();
+                SetState(UnitState.Minig);
+            }
+        }
+    }
+
     void HandleChoppingTask()
     {
         var treeBottomPosition = m_AssignedTree.GetBottomPosition();
@@ -133,6 +206,7 @@ public class WorkerUnit : HumanoidUnit
 
         if (distance <= 0.1f)
         {
+            m_GoldCollected = 0;
             StopMovement();
             SetState(UnitState.Chopping);
         }

@@ -20,7 +20,7 @@ public class HumanoidUnit : Unit
 
     protected void Update()
     {
-        if (CurrentState == UnitState.Dead) return;
+        if (CurrentState == UnitState.Dead || CurrentState == UnitState.Minig) return;
 
         UpdateVelocity();
         UpdateBehaviour();
@@ -71,6 +71,7 @@ public class HumanoidUnit : Unit
         m_Animator.SetTrigger("Dead");
         StartCoroutine(LateObjectDestroy(1.2f));
     }
+
     private IEnumerator LateObjectDestroy(float delay)
     {
         yield return new WaitForSeconds(delay);
