@@ -178,6 +178,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd7b2dfa8b296a44fbe53f31faf62156, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_IsKingUnit: 0
   m_Actions:
   - {fileID: 11400000, guid: 134ebb1d45977bf40b850797c414f53d, type: 2}
   - {fileID: 11400000, guid: 15b69ed9c0ff4c54188a4378a2f7f4d5, type: 2}
@@ -187,6 +188,64 @@ MonoBehaviour:
   m_AutoAttackFrequency: 1.5
   m_AutoAttackDamageDelay: 0.5
   m_AutoAttackDamage: 10
-  m_Health: 400
+  m_Health: 100
   m_DamageFlashColor: {r: 1, g: 0.65, b: 0.65, a: 1}
+  m_InteractionAudioSettings:
+    Clips:
+    - {fileID: 8300000, guid: a6ed5926f303e1a43abec2fd7c9765c3, type: 3}
+    - {fileID: 8300000, guid: c3c5f6045371e344a8a4d4c82746d9e6, type: 3}
+    - {fileID: 8300000, guid: e430e07e14cc53b4fb1b21eb21600e93, type: 3}
+    - {fileID: 8300000, guid: 1240bef95e29fc04fb2b8b201804e310, type: 3}
+    - {fileID: 8300000, guid: 37f8155ba68ee564c9c2bb5299d52f42, type: 3}
+    - {fileID: 8300000, guid: 631ca5f2c93db47418e3460b6f4fd3cc, type: 3}
+    - {fileID: 8300000, guid: 94560a2477019374a8b152f726858afd, type: 3}
+    - {fileID: 8300000, guid: 042d9998c9b56c746a44385f19a5e8cd, type: 3}
+    - {fileID: 8300000, guid: b5f260f3a2eaac34baef2b39930488ca, type: 3}
+    - {fileID: 8300000, guid: d378864cc59350844a88d7efe2a90940, type: 3}
+    Volume: 0.6
+    Pitch: 1
+    Loop: 0
+    SpatialBlend: 0
+    MinDistance: 5
+    MaxDistance: 50
+    Priority: 128
+    RolloffMode: 1
+  m_AttackAudioSettings:
+    Clips:
+    - {fileID: 8300000, guid: b8ea5594f57975c478d8d0901cde1f8d, type: 3}
+    - {fileID: 8300000, guid: 0204cd4eaba85834da705f4f0d63e317, type: 3}
+    - {fileID: 8300000, guid: 40d2ac5fe1f66cb4a9ed686784e463c1, type: 3}
+    Volume: 0.6
+    Pitch: 1
+    Loop: 0
+    SpatialBlend: 1
+    MinDistance: 1
+    MaxDistance: 15
+    Priority: 128
+    RolloffMode: 1
+  m_TerminationAudioSettings:
+    Clips:
+    - {fileID: 8300000, guid: 06f022b50c6b6524b93aba718014e236, type: 3}
+    Volume: 0.6
+    Pitch: 1
+    Loop: 0
+    SpatialBlend: 1
+    MinDistance: 1
+    MaxDistance: 15
+    Priority: 128
+    RolloffMode: 1
   IsTargeted: 0
+  m_FootstepAudioSettings:
+    Clips:
+    - {fileID: 8300000, guid: db72556dd1c7d574ab57d5cea3bac91b, type: 3}
+    - {fileID: 8300000, guid: 04a86c372664c2d419165822e3ebd3a0, type: 3}
+    - {fileID: 8300000, guid: 6a9dcfccbd8f88446abf484ebc646d1e, type: 3}
+    Volume: 0.5
+    Pitch: 1
+    Loop: 0
+    SpatialBlend: 1
+    MinDistance: 1
+    MaxDistance: 15
+    Priority: 128
+    RolloffMode: 1
+  m_FootstepFrequency: 0.3

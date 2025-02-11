@@ -138,6 +138,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 188d0e6f0256c974ab1bbb7bb93c6cbe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_IsKingUnit: 0
   m_Actions: []
   m_ObjectDetectionRadius: 7
   m_UnitDetectionCheckRate: 0.5
@@ -147,5 +148,42 @@ MonoBehaviour:
   m_AutoAttackDamage: 5
   m_Health: 500
   m_DamageFlashColor: {r: 1, g: 0.65, b: 0.65, a: 1}
+  m_InteractionAudioSettings:
+    Clips:
+    - {fileID: 8300000, guid: fcffd70bed54cbb40a65bec762a0497f, type: 3}
+    - {fileID: 8300000, guid: 8dd90f5c7499a7943a36a9442d93831e, type: 3}
+    - {fileID: 8300000, guid: eef245a1f43bfa14ea3eb3da095077f8, type: 3}
+    Volume: 0.6
+    Pitch: 1
+    Loop: 0
+    SpatialBlend: 0
+    MinDistance: 1
+    MaxDistance: 15
+    Priority: 128
+    RolloffMode: 1
+  m_AttackAudioSettings:
+    Clips:
+    - {fileID: 8300000, guid: 89cfa29bbda4e904685659f7c66c5621, type: 3}
+    Volume: 0.6
+    Pitch: 1
+    Loop: 0
+    SpatialBlend: 1
+    MinDistance: 1
+    MaxDistance: 15
+    Priority: 128
+    RolloffMode: 1
+  m_TerminationAudioSettings:
+    Clips:
+    - {fileID: 8300000, guid: f15cbc59958729140bb45cbe76fc5fb2, type: 3}
+    Volume: 0.4
+    Pitch: 1
+    Loop: 0
+    SpatialBlend: 1
+    MinDistance: 1
+    MaxDistance: 15
+    Priority: 128
+    RolloffMode: 1
   IsTargeted: 0
+  m_CanStoreWood: 0
+  m_CanStoreGold: 0
   m_ProjectilePrefab: {fileID: 5906993068508690588, guid: 06338bcbf40aedb4084152db5a8eda5d, type: 3}

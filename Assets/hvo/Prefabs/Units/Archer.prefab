@@ -178,6 +178,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4126afe2828e884f8ebce0223ca1b7d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_IsKingUnit: 0
   m_Actions:
   - {fileID: 11400000, guid: 134ebb1d45977bf40b850797c414f53d, type: 2}
   - {fileID: 11400000, guid: 15b69ed9c0ff4c54188a4378a2f7f4d5, type: 2}
@@ -189,5 +190,61 @@ MonoBehaviour:
   m_AutoAttackDamage: 3
   m_Health: 100
   m_DamageFlashColor: {r: 1, g: 0.65, b: 0.65, a: 1}
+  m_InteractionAudioSettings:
+    Clips:
+    - {fileID: 8300000, guid: ae64802ac2fc04dfd8bba485f881ee76, type: 3}
+    - {fileID: 8300000, guid: 92c5dbd7af4ea49efb34082206492bb8, type: 3}
+    - {fileID: 8300000, guid: d3268cee5fc81419c9d11a10a5c7c180, type: 3}
+    - {fileID: 8300000, guid: ed2476fdf9f8a452cb15687d554178a6, type: 3}
+    - {fileID: 8300000, guid: 89fb504b7296e4f06bf00992d387ba8b, type: 3}
+    - {fileID: 8300000, guid: 41d571022e1e84863ad8a07f81d805f5, type: 3}
+    - {fileID: 8300000, guid: 32fed269273964508b53b003ba552004, type: 3}
+    - {fileID: 8300000, guid: 3119bc65d411c406e8b20ce5ee1433ec, type: 3}
+    - {fileID: 8300000, guid: 1386339034c8140089f8cb7612d6881f, type: 3}
+    - {fileID: 8300000, guid: 44d35aace274e449dbade6d021aca9df, type: 3}
+    Volume: 0.6
+    Pitch: 1
+    Loop: 0
+    SpatialBlend: 0
+    MinDistance: 1
+    MaxDistance: 15
+    Priority: 128
+    RolloffMode: 1
+  m_AttackAudioSettings:
+    Clips:
+    - {fileID: 8300000, guid: 0888ccb49930a5846a4c64706074a31e, type: 3}
+    Volume: 0.6
+    Pitch: 1
+    Loop: 0
+    SpatialBlend: 1
+    MinDistance: 1
+    MaxDistance: 15
+    Priority: 128
+    RolloffMode: 1
+  m_TerminationAudioSettings:
+    Clips:
+    - {fileID: 8300000, guid: 06f022b50c6b6524b93aba718014e236, type: 3}
+    Volume: 0.6
+    Pitch: 1
+    Loop: 0
+    SpatialBlend: 1
+    MinDistance: 1
+    MaxDistance: 15
+    Priority: 128
+    RolloffMode: 1
   IsTargeted: 0
+  m_FootstepAudioSettings:
+    Clips:
+    - {fileID: 8300000, guid: db72556dd1c7d574ab57d5cea3bac91b, type: 3}
+    - {fileID: 8300000, guid: 04a86c372664c2d419165822e3ebd3a0, type: 3}
+    - {fileID: 8300000, guid: 6a9dcfccbd8f88446abf484ebc646d1e, type: 3}
+    Volume: 0.5
+    Pitch: 1
+    Loop: 0
+    SpatialBlend: 1
+    MinDistance: 1
+    MaxDistance: 15
+    Priority: 128
+    RolloffMode: 1
+  m_FootstepFrequency: 0.3
   m_ProjectilePrefab: {fileID: 5906993068508690588, guid: 06338bcbf40aedb4084152db5a8eda5d, type: 3}
