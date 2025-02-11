@@ -16,6 +16,7 @@ public class HumanoidUnit : Unit
     public float CurrentSpeed => m_Velocity.magnitude;
 
     private float m_LastFootStepTime;
+
     protected override void Start()
     {
         base.Start();
@@ -38,16 +39,17 @@ public class HumanoidUnit : Unit
         m_Velocity = new Vector2(
             (transform.position.x - m_LastPosition.x),
             (transform.position.y - m_LastPosition.y)
-        ) / Time.deltaTime;
+        ) / Time.unscaledDeltaTime;
 
         m_LastPosition = transform.position;
-        m_SmoothedSpeed = Mathf.Lerp(m_SmoothedSpeed, CurrentSpeed, Time.deltaTime * m_SmoothFactor);
+        m_SmoothedSpeed = Mathf.Lerp(m_SmoothedSpeed, CurrentSpeed, Time.unscaledDeltaTime * m_SmoothFactor);
 
         if (CurrentState != UnitState.Attacking)
         {
             var state = m_SmoothedSpeed > 0.1f ? UnitState.Moving : UnitState.Idle;
             SetState(state);
         }
+
         if (
             IsTargeted
             && CurrentState == UnitState.Moving
@@ -89,5 +91,9 @@ public class HumanoidUnit : Unit
     {
         yield return new WaitForSeconds(delay);
         Destroy(gameObject);
+        if (IsKingUnit)
+        {
+            m_GameManager.HandleGameOver(false);
+        }
     }
 }

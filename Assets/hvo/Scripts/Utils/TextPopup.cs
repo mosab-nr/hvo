@@ -12,6 +12,7 @@ public class TextPopup : MonoBehaviour
 
     private float m_ElapsedTime;
     private int m_RandomXDirection = 1;
+
     void Start()
     {
         m_RandomXDirection = Random.Range(-1, 2);
@@ -25,7 +26,7 @@ public class TextPopup : MonoBehaviour
 
     void Update()
     {
-        m_ElapsedTime += Time.deltaTime;
+        m_ElapsedTime += Time.unscaledDeltaTime;
         var normalizedTime = m_ElapsedTime / m_Duration;
 
         if (normalizedTime >= 1)
@@ -35,11 +36,11 @@ public class TextPopup : MonoBehaviour
         }
 
         var alpha = m_AlphaCurve.Evaluate(normalizedTime);
-        m_Text.fontSize += m_FontSizeCurve.Evaluate(normalizedTime) / 5;
+        m_Text.fontSize += m_FontSizeCurve.Evaluate(normalizedTime) / 7;
         m_Text.color = new Color(m_Text.color.r, m_Text.color.g, m_Text.color.b, alpha);
         float xOffset = m_XOffsetCurve.Evaluate(normalizedTime) * 1.1f * m_RandomXDirection;
         float yOffset = m_YOffsetCurve.Evaluate(normalizedTime) * 1.1f;
 
-        transform.position += new Vector3(xOffset, yOffset, 0) * Time.deltaTime;
+        transform.position += new Vector3(xOffset, yOffset, 0) * Time.unscaledDeltaTime;
     }
 }

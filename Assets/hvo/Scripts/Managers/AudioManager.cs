@@ -28,6 +28,7 @@ public class AudioManager : SingletonManager<AudioManager>
 {
     [SerializeField] private AudioSource m_MusicSource;
     [SerializeField] private int m_InitialPoolSize = 10;
+    [SerializeField] private AudioSettings m_UiClickAudioSettings;
 
     private Queue<AudioSource> m_AudioSourcePool;
     private List<AudioSource> m_ActiveSources;
@@ -39,12 +40,18 @@ public class AudioManager : SingletonManager<AudioManager>
         InitializeAudioPool();
     }
 
+    public void PlayBtnClick()
+    {
+        PlaySound(m_UiClickAudioSettings, Vector3.zero);
+    }
     public void PlayMusic(AudioSettings settings)
     {
         if (settings == null || settings.Clips.Length == 0) return;
+
         ConfigureAudioSource(m_MusicSource, settings);
         m_MusicSource.Play();
     }
+
     public void PlaySound(AudioSettings audioSettings, Vector3 position)
     {
         if (audioSettings == null || audioSettings.Clips.Length == 0) return;

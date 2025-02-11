@@ -1,9 +1,16 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using System.Linq;
 
 public enum ClickType
 {
     Move, Attack, Build, Chop
+}
+
+public enum GameState
+{
+    Playing, Paused
 }
 
 public class GameManager : SingletonManager<GameManager>
@@ -17,6 +24,7 @@ public class GameManager : SingletonManager<GameManager>
     [SerializeField] private ConfirmationBar m_BuildConfirmationBar;
     [SerializeField] private TextPopupController m_TextPopupController;
     [SerializeField] private ResourceDataUI m_ResourceDataUI;
+    [SerializeField] private GameOverLayout m_GameOverLayout;
 
     [Header("Camera Settings")]
     [SerializeField] private float m_PanSpeed = 100;
@@ -35,9 +43,12 @@ public class GameManager : SingletonManager<GameManager>
     [Header("Audio")]
     [SerializeField] private AudioSettings m_PlacementAudioSettings;
     [SerializeField] private AudioSettings m_BgMusicAudioSettings;
+    [SerializeField] private AudioSettings m_WinAudioSettings;
+    [SerializeField] private AudioSettings m_LoseAudioSettings;
 
     public Unit ActiveUnit;
 
+    private GameState m_GameState = GameState.Playing;
     private Unit m_KingUnit;
     private Tree[] m_Trees = new Tree[0];
     private List<Unit> m_PlayerUnits = new();
@@ -54,18 +65,36 @@ public class GameManager : SingletonManager<GameManager>
     public bool HasActiveUnit => ActiveUnit != null;
     public Unit KingUnit => m_KingUnit;
 
+    void OnDestroy()
+    {
+        m_GameOverLayout.OnRestartClicked -= RestartGame;
+        m_GameOverLayout.OnQuitClicked -= GoToMenu;
+    }
+
     void Start()
     {
+        Time.timeScale = 1;
         m_CameraController = new CameraController(m_PanSpeed, m_MobilePanSpeed);
         ClearActionBarUI();
         AddResources(500, 500);
 
         m_EnemySpawner.Startup();
         AudioManager.Get().PlayMusic(m_BgMusicAudioSettings);
+
+        m_GameOverLayout.OnRestartClicked += RestartGame;
+        m_GameOverLayout.OnQuitClicked += GoToMenu;
     }
 
     void Update()
     {
+        if (m_GameState == GameState.Paused) return;
+
+        if (m_EnemySpawner.SpawnState == SpawnState.Finished && m_Enemies.Count == 0)
+        {
+            HandleGameOver(true);
+            return;
+        }
+
         m_CameraController.Update();
 
         if (m_PlacementProcess != null)
@@ -105,13 +134,13 @@ public class GameManager : SingletonManager<GameManager>
     {
         if (unit.IsPlayer)
         {
-            if (m_PlacementProcess != null)
-            {
-                CancelBuildPlacement();
-            }
-
             if (ActiveUnit == unit)
             {
+                if (m_PlacementProcess != null)
+                {
+                    CancelBuildPlacement();
+                }
+
                 ClearActionBarUI();
                 ActiveUnit.Deselect();
                 ActiveUnit = null;
@@ -182,9 +211,14 @@ public class GameManager : SingletonManager<GameManager>
         return closestTree;
     }
 
+    IEnumerable<Unit> GetAllPlayerUnits()
+    {
+        return m_PlayerUnits.Concat(m_PlayerBuildings);
+    }
+
     public Unit FindClosestUnit(Vector3 originPosition, float maxDistance, bool isPlayer)
     {
-        List<Unit> units = isPlayer ? m_PlayerUnits : m_Enemies;
+        IEnumerable<Unit> units = isPlayer ? GetAllPlayerUnits() : m_Enemies;
         float sqrMaxDistance = maxDistance * maxDistance;
         Unit closestUnit = null;
         float closestDistanceSqr = float.MaxValue;
@@ -278,6 +312,7 @@ public class GameManager : SingletonManager<GameManager>
 
     void FinalizeUnitTraining(TrainUnitActionSO trainUnitAction)
     {
+        AudioManager.Get().PlayBtnClick();
         if (!TryDeductResources(trainUnitAction.GoldCost, trainUnitAction.WoodCost))
         {
             Debug.Log("Not Enough Resources!");
@@ -325,6 +360,7 @@ public class GameManager : SingletonManager<GameManager>
 
     void CancelUnitTrainingConfirmation()
     {
+        AudioManager.Get().PlayBtnClick();
         m_BuildConfirmationBar.Hide();
     }
 
@@ -556,7 +592,10 @@ public class GameManager : SingletonManager<GameManager>
         {
             m_ActionBar.RegisterAction(
                 action.Icon,
-                () => action.Execute(this)
+                () => {
+                    AudioManager.Get().PlayBtnClick();
+                    action.Execute(this);
+                }
             );
         }
     }
@@ -610,6 +649,7 @@ public class GameManager : SingletonManager<GameManager>
 
     void CancelBuildPlacement()
     {
+        AudioManager.Get().PlayBtnClick();
         m_BuildConfirmationBar.Hide();
         m_PlacementProcess.Cleanup();
         m_PlacementProcess = null;
@@ -627,13 +667,58 @@ public class GameManager : SingletonManager<GameManager>
         return false;
     }
 
+    public void HandleGameOver(bool isVictory)
+    {
+        if (isVictory)
+        {
+            AudioManager.Get().PlayMusic(m_WinAudioSettings);
+        }
+        else
+        {
+            AudioManager.Get().PlayMusic(m_LoseAudioSettings);
+        }
+
+        Time.timeScale = 0;
+        m_GameOverLayout.ShowGameOver(isVictory);
+        m_GameState = GameState.Paused;
+    }
+
+    void RestartGame()
+    {
+        foreach (var unit in m_PlayerUnits)
+        {
+            Destroy(unit.gameObject);
+        }
+
+        foreach (var enemy in m_Enemies)
+        {
+            Destroy(enemy.gameObject);
+        }
+
+        foreach (var structure in m_PlayerBuildings)
+        {
+            Destroy(structure.gameObject);
+        }
+
+        m_PlayerUnits.Clear();
+        m_Enemies.Clear();
+        m_PlayerBuildings.Clear();
+
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    void GoToMenu()
+    {
+        SceneManager.LoadScene("MenuScene");
+    }
+
     void OnGUI()
     {
-        if (ActiveUnit != null)
-        {
-            GUI.Label(new Rect(20, 120, 200, 20), "State: " + ActiveUnit.CurrentState.ToString(), new GUIStyle { fontSize = 30 });
-            GUI.Label(new Rect(20, 160, 200, 20), "Task: " + ActiveUnit.CurrentTask.ToString(), new GUIStyle { fontSize = 30 });
-            GUI.Label(new Rect(20, 200, 200, 20), "Stance: " + ActiveUnit.CurrentStance.ToString(), new GUIStyle { fontSize = 30 });
-        }
+        // if (ActiveUnit != null)
+        // {
+        //     GUI.Label(new Rect(20, 120, 200, 20), "State: " + ActiveUnit.CurrentState.ToString(), new GUIStyle { fontSize = 30 });
+        //     GUI.Label(new Rect(20, 160, 200, 20), "Task: " + ActiveUnit.CurrentTask.ToString(), new GUIStyle { fontSize = 30 });
+        //     GUI.Label(new Rect(20, 200, 200, 20), "Stance: " + ActiveUnit.CurrentStance.ToString(), new GUIStyle { fontSize = 30 });
+        // }
     }
 }
